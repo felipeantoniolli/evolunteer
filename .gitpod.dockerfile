@@ -3,7 +3,7 @@ FROM gitpod/workspace-full
 USER root
 
 RUN apt-get update \
- && apt-get -y install postgresql postgresql-contrib mysql-server mysql-client \
+ && apt-get -y install mysql-server mysql-client \
  && apt-get -y install php-fpm php-cli php-bz2 php-bcmath php-gmp php-imap php-shmop php-soap php-xmlrpc php-xsl php-ldap \
  && apt-get -y install php-amqp php-apcu php-imagick php-memcached php-mongodb php-oauth php-redis\
  && apt-get clean && rm -rf /var/cache/apt/* /var/lib/apt/lists/* /tmp/*
@@ -72,13 +72,6 @@ expire_logs_days	= 10\n\
 max_binlog_size     = 100M' > /etc/mysql/my.cnf
 
 USER gitpod
-ENV PATH="$PATH:/usr/lib/postgresql/10/bin"
-ENV PGDATA="/home/gitpod/pg/data"
-RUN mkdir -p ~/pg/data; mkdir -p ~/pg/scripts; mkdir -p ~/pg/log; mkdir -p ~/pg/sockets; initdb -D pg/data/
-RUN echo '#!/bin/bash\npg_ctl -D ~/pg/data/ -l ~/pg/log/pgsql.log -o "-k ~/pg/sockets" start' > ~/pg/scripts/pg_start.sh
-RUN echo '#!/bin/bash\npg_ctl -D ~/pg/data/ -l ~/pg/log/pgsql.log -o "-k ~/pg/sockets" stop' > ~/pg/scripts/pg_stop.sh
-RUN chmod +x ~/pg/scripts/*
-ENV PATH="$PATH:$HOME/pg/scripts"
 
 RUN mysqld --daemonize --skip-grant-tables \
     && sleep 3 \
