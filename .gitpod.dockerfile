@@ -76,7 +76,6 @@ USER gitpod
 RUN mysqld --daemonize --skip-grant-tables \
     && sleep 3 \
     && ( mysql -uroot -e "USE mysql; UPDATE user SET authentication_string=PASSWORD(\"123456\") WHERE user='root'; UPDATE user SET plugin=\"mysql_native_password\" WHERE user='root'; FLUSH PRIVILEGES;" ) \
-    && ( mysql -uroot -e "create database evolunteer" ) \
-    && mysqladmin -uroot -p123456 shutdown;
+    && mysqladmin -uroot -p123456 shutdown ;
 
 USER root
