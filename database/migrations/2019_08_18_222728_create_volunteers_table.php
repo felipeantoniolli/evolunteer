@@ -18,8 +18,8 @@ class CreateVolunteersTable extends Migration
             $table->unsignedBigInteger('id_user');
             $table->string('name', 50);
             $table->string('last_name', 100);
-            $table->string('cpf', 11);
-            $table->string('rg', 10)->nullable();
+            $table->string('cpf', 11)->unique();
+            $table->string('rg', 10)->unique()->nullable();
             $table->date('birth');
             $table->boolean('gender')->nullable();
 
