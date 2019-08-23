@@ -18,7 +18,7 @@ class CreateWorksTable extends Migration
             $table->unsignedBigInteger('id_institution');
             $table->string('name');
             $table->text('content');
-            $table->string('work_date');
+            $table->dateTime('work_date');
 
             $table->foreign('id_institution')->references('id_institution')->on('institutions');
             $table->softDeletes();
