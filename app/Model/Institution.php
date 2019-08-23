@@ -17,8 +17,6 @@ class Institution extends Model
         'reason',
         'fantasy',
         'cpf',
-        'cnpj',
-        'created_at',
-        'updated_at'
+        'cnpj'
     ];
 }

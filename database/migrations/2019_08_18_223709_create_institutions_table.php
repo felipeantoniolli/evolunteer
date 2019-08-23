@@ -18,8 +18,8 @@ class CreateInstitutionsTable extends Migration
             $table->unsignedBigInteger('id_user');
             $table->string('reason', 150);
             $table->string('fantasy', 150);
-            $table->string('cpf', 11);
-            $table->string('cnpj', 14);
+            $table->string('cpf', 11)->unique()->nullable();
+            $table->string('cnpj', 14)->unique()->nullable();
 
             $table->foreign('id_user')->references('id_user')->on('users');
             $table->softDeletes();
