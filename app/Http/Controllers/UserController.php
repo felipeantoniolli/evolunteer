@@ -5,17 +5,34 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\GeneralController;
 use App\Model\User;
+use Validator;
 
 class UserController extends Controller
 {
     public function create(Request $request)
     {
         $user = $request->all();
+        $rules = User::rules();
 
-        $user['password'] = GeneralController::parseToSha256($user['password']);
-        if (!User::create($user)) {
+        $validator = Validator::make(
+            $user,
+            $rules['rules'],
+            $rules['messages']
+        );
+
+        if ($validator->fails()) {
             return response()->json([
                 'success' => false,
+                'errors' => $validator->errors(),
+                'user' => $user
+            ], 401);
+        }
+
+        $user['password'] = GeneralController::parseToSha256($user['password']);
+        if (!$user = User::create($user)) {
+            return response()->json([
+                'success' => false,
+                'errors' => 'Users not created',
                 'user' => $user
             ], 400);
         }
@@ -48,7 +65,7 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $req = $request->all();
-        $password = $user['password'];
+        $req['password'] = GeneralController::parseToSha256($req['password']);
 
         foreach ($req as $index => $value) {
             if ($value != $user[$index]) {
@@ -56,11 +73,23 @@ class UserController extends Controller
             }
         }
 
-        if ($password != $user['password']) {
-            $user['password'] = GeneralController::parseToSha256($req['password']);
+        $rules = User::rules();
+
+        $validator = Validator::make(
+            $user,
+            $rules['rules'],
+            $rules['messages']
+        );
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors(),
+                'user' => $user
+            ], 401);
         }
 
-        if (!$user->save()) {
+        if (!$user = $user->save()) {
             return response()->json([
                 'success' => false,
                 'user' => $user
