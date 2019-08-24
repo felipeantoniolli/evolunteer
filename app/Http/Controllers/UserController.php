@@ -12,7 +12,7 @@ class UserController extends Controller
     public function create(Request $request)
     {
         $user = $request->all();
-        $rules = User::rules();
+        $rules = User::insertRules();
 
         $validator = Validator::make(
             $user,
@@ -21,50 +21,77 @@ class UserController extends Controller
         );
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors(),
-                'user' => $user
-            ], 401);
+            return GeneralController::jsonReturn(
+                false,
+                401,
+                $user,
+                'Validation error.',
+                $validator->errors()
+            );
         }
 
         $user['password'] = GeneralController::parseToSha256($user['password']);
         if (!$user = User::create($user)) {
-            return response()->json([
-                'success' => false,
-                'errors' => 'Users not created',
-                'user' => $user
-            ], 400);
+            return GeneralController::jsonReturn(true, 400, $user, 'User not created.');
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Successfully created user',
-            'user' => $user
-        ], 201);
+        return GeneralController::jsonReturn(true, 201, $user, 'Successfully created user.');
     }
 
     public function findAll()
     {
-        return response()->json([
-            'success' => true,
-            'message' => 'Users successfully found',
-            'users' => User::all()
-        ], 200);
+        $users = User::all();
+
+        if (!$users) {
+            return GeneralController::jsonReturn(false, 400, $users, 'Users not found.');
+        }
+
+        return GeneralController::jsonReturn(true, 200, $users, 'Users successfully found.');
     }
 
     public function findById(User $user)
     {
-        return response()->json([
-            'success' => true,
-            'message' => 'User successfully found',
-            'user' => $user
-        ], 200);
+        if (!$user) {
+            return GeneralController::jsonReturn(false, 400, [],  'User not found.');
+        }
+
+        return GeneralController::jsonReturn(true, 200, $user, 'User successfully found.');
     }
 
     public function update(Request $request, User $user)
     {
         $req = $request->all();
+        $rules = User::updateRules($req, $user);
+
+        $validator = Validator::make(
+            $req,
+            $rules['rules'],
+            $rules['messages']
+        );
+
+        if ($validator->fails()) {
+            return GeneralController::jsonReturn(
+                false,
+                401,
+                $req,
+                'Validation error.',
+                $validator->errors()
+            );
+        }
+
+        $uniqueRules = User::uniqueRules($req, $user);
+
+        if ($uniqueRules) {
+            return GeneralController::jsonReturn(
+                false,
+                401,
+                $req,
+                'Validation error.',
+                $uniqueRules
+            );
+        }
+
+        $user = $user->toArray();
         $req['password'] = GeneralController::parseToSha256($req['password']);
 
         foreach ($req as $index => $value) {
@@ -73,47 +100,19 @@ class UserController extends Controller
             }
         }
 
-        $rules = User::rules();
-
-        $validator = Validator::make(
-            $user,
-            $rules['rules'],
-            $rules['messages']
-        );
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors(),
-                'user' => $user
-            ], 401);
-        }
-
         if (!$user = $user->save()) {
-            return response()->json([
-                'success' => false,
-                'user' => $user
-            ], 400);
+            return GeneralController::jsonReturn(false, 400, $user, 'User not updated.');
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'User updated successfully',
-            'user' => $user
-        ], 200);
+        return GeneralController::jsonReturn(true, 200, $req, 'User updated successfully.');
     }
 
     public function destroy(User $user)
     {
         if (!$user->delete()) {
-            return response()->json([
-                'success' => false
-            ], 400);
+            return GeneralController::jsonReturn(false, 400, $user, 'User not deleted');
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'User successfully deleted'
-        ], 200);
+        return GeneralController::jsonReturn(true, 200, $user, 'User successfully deleted');
     }
 }

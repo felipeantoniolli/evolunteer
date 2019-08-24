@@ -4,12 +4,29 @@ namespace App\Http\Controllers;
 
 use App\Model\Volunteer;
 use Illuminate\Http\Request;
+use Validator;
 
 class VolunteerController extends Controller
 {
     public function create(Request $request)
     {
         $volunteer = $request->all();
+        $rules = Volunteer::rules();
+
+        $validator = Validator::make(
+            $volunteer,
+            $rules['rules'],
+            $rules['messages']
+        );
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors(),
+                'user' => $volunteer
+            ], 401);
+        }
+
         if (!Volunteer::create($volunteer)) {
             return response()->json([
                 'success' => false,

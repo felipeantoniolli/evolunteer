@@ -22,4 +22,25 @@ class Volunteer extends Model
         'birth',
         'gender'
     ];
+
+    public static function rules()
+    {
+        return [
+            'rules' => [
+                'id_user' => 'required',
+                'name' => 'required|min:3|max:50',
+                'last_name' => 'required|min:3|max:100',
+                'cpf' => 'required|min:11|max:11|unique:volunteers|unique:institutions',
+                'rg' => 'required|min:7|max:10',
+                'birth' => 'required|date'
+            ],
+            'messages' => [
+                'required' => 'Campo obrigatório',
+                'min' => 'Campo inválido',
+                'max' => 'Campo inválido',
+                'cpf.unique' => 'Este cpf já está em uso',
+                'birth.date' => 'Data inválida'
+            ]
+        ];
+    }
 }
