@@ -31,6 +31,7 @@ class UserController extends Controller
         }
 
         $user['password'] = GeneralController::parseToSha256($user['password']);
+
         if (!$user = User::create($user)) {
             return GeneralController::jsonReturn(true, 400, $user, 'User not created.');
         }
@@ -61,7 +62,7 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $req = $request->all();
-        $rules = User::updateRules($req, $user);
+        $rules = User::updateRules();
 
         $validator = Validator::make(
             $req,
@@ -91,12 +92,11 @@ class UserController extends Controller
             );
         }
 
-        $user = $user->toArray();
         $req['password'] = GeneralController::parseToSha256($req['password']);
 
         foreach ($req as $index => $value) {
             if ($value != $user[$index]) {
-                $user[$index] = $value;
+                $user->$index = $value;
             }
         }
 

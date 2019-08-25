@@ -20,7 +20,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'id_user',
-        'user',
+        'username',
         'email',
         'password',
         'telephone',
@@ -59,7 +59,7 @@ class User extends Authenticatable
     {
         return [
             'rules' => [
-                'user' => 'required|min:3|max:25|unique:users,user',
+                'username' => 'required|min:3|max:25|unique:users',
                 'email' => 'required|email|unique:users',
                 'password' => 'required',
                 'telephone' => 'required|min:8|max:11',
@@ -68,17 +68,18 @@ class User extends Authenticatable
                 'street' => 'required|min:3|max:100',
                 'number' => 'required|min:3|max:10',
                 'city' => 'required|min:3|max:50',
-                'state' => 'required|min:2|max:2'
+                'state' => 'required|min:2|max:2',
+                'secondary_email' => 'nullable|email|unique:users,email|unique:users,secondary_email'
             ],
             'messages' => self::messagesRules()
         ];
     }
 
-    public static function updateRules($request, $user)
+    public static function updateRules()
     {
         return [
             'rules' => [
-                'user' => 'required|min:3|max:25',
+                'username' => 'required|min:3|max:25',
                 'email' => 'required|email',
                 'password' => 'required',
                 'telephone' => 'required|min:8|max:11',
@@ -87,7 +88,8 @@ class User extends Authenticatable
                 'street' => 'required|min:3|max:100',
                 'number' => 'required|min:3|max:10',
                 'city' => 'required|min:3|max:50',
-                'state' => 'required|min:2|max:2'
+                'state' => 'required|min:2|max:2',
+                'secondary_email' => 'nullable|email'
             ],
             'messages' => self::messagesRules()
         ];
@@ -96,31 +98,38 @@ class User extends Authenticatable
     public static function messagesRules()
     {
         return [
-            'required' => 'Campo obrigatório',
-            'min' => 'Campo inválido',
-            'max' => 'Campo inválido',
-            'user.unique' => 'Este usuário já está em uso',
-            'email' => 'Email inválido',
-            'email.unique' => 'Email em uso',
-            'secondary_email.unique' => 'Email em uso'
+            'required' => 'Campo obrigatório.',
+            'min' => 'Campo inválido.',
+            'max' => 'Campo inválido.',
+            'username.unique' => 'Este usuário já está em uso.',
+            'email' => 'Email inválido.',
+            'email.unique' => 'Email em uso.',
+            'secondary_email.unique' => 'Email em uso.'
         ];
     }
 
-    public static function uniqueRules($req, $user)
+    public static function uniqueRules($req, $data)
     {
         $errors = [];
 
-        $userNotUnique = User::where('user', $req['user'])
-        ->where('id_user', '<>', $user->id_user);
+        var_dump($data->id_user);
+        die;
+
+        $userNotUnique = User::where('username', $req['username'])
+        ->where('id_user', '<>', $data->id_user)->first();
+
+        var_dump($userNotUnique);
+        die;
 
         $emailNotUnique = User::where('email', $req['email'])
-        ->where('id_user', '<>', $user->id_user);
+        ->where('id_user', '<>', $data->id_user)->first();
 
         $secondayEmailNotUnique = null;
 
         if ($req['secondary_email']) {
-            $secondayEmailNotUnique = User::where('secondary_email', $req['seconday_email'])
-            ->where('id_user', '<>', $user->id_user);
+            $secondayEmailNotUnique = User::where('secondary_email', $req['secondary_email'])
+            ->where('email', $req['secondary_email'])
+            ->where('id_user', '<>', $data->id_user)->fisrt();
         }
 
         if ($userNotUnique) {
