@@ -44,7 +44,7 @@ class UserController extends Controller
         $users = User::all();
 
         if (!$users) {
-            return GeneralController::jsonReturn(false, 400, $users, 'Users not found.');
+            return GeneralController::jsonReturn(false, 400, [], 'Users not found.');
         }
 
         return GeneralController::jsonReturn(true, 200, $users, 'Users successfully found.');

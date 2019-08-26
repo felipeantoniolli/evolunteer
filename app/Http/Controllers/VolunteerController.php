@@ -87,7 +87,7 @@ class VolunteerController extends Controller
         $volunteers = Volunteer::all();
 
         if (!$volunteers) {
-            return GeneralController::jsonReturn(false, 400, $volunteers, 'Volunteers not found.');
+            return GeneralController::jsonReturn(false, 400, [], 'Volunteers not found.');
         }
 
         return GeneralController::jsonReturn(true, 200, $volunteers, 'Volunteers successfully found.');

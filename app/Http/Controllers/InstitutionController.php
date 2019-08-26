@@ -4,81 +4,110 @@ namespace App\Http\Controllers;
 
 use App\Model\Institution;
 use Illuminate\Http\Request;
+use Validator;
 
 class InstitutionController extends Controller
 {
     public function create(Request $request)
     {
         $institution = $request->all();
-        if (!Institution::create($institution)) {
-            return response()->json([
-                'success' => false,
-                'institution' => $institution
-            ], 400);
+        $rules = Institution::insertRules();
+
+        $validator = Validator::make(
+            $institution,
+            $rules['rules'],
+            $rules['messages']
+        );
+
+        if ($validator->fails()) {
+            return GeneralController::jsonReturn(
+                false,
+                401,
+                $institution,
+                'Validation error.',
+                $validator->errors()
+            );
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Successfully created institution',
-            'institution' => $institution
-        ], 201);
+        if (!Institution::create($institution)) {
+            return GeneralController::jsonReturn(true, 400, $institution, 'Institution not created.');
+        }
+
+        return GeneralController::jsonReturn(true, 201, $institution, 'Successfully created Institution.');
     }
 
     public function update(Request $request, Institution $institution)
     {
         $req = $request->all();
+        $rules = Institution::Updaterules();
+
+        $validator = Validator::make(
+            $req,
+            $rules['rules'],
+            $rules['messages']
+        );
+
+        if ($validator->fails()) {
+            return GeneralController::jsonReturn(
+                false,
+                401,
+                $req,
+                'Validation error.',
+                $validator->errors()
+            );
+        }
+
+        $uniqueRules = Institution::uniqueRules($req, $institution);
+
+        if ($uniqueRules) {
+            return GeneralController::jsonReturn(
+                false,
+                401,
+                $req,
+                'Validation error.',
+                $uniqueRules
+            );
+        }
 
         foreach ($req as $index => $value) {
             if ($value != $institution[$index]) {
-                $institution[$index] = $value;
+            $institution->$index = $value;
             }
         }
 
-        if (!$institution->save()) {
-            return response()->json([
-                'success' => false,
-                'institution' => $institution
-            ], 400);
+        if (!$institution = $institution->save()) {
+            return GeneralController::jsonReturn(false, 400, $institution, 'Institution not updated.');
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Institution updated successfully',
-            'institution' => $institution
-        ], 201);
+        return GeneralController::jsonReturn(true, 200, $req, 'Institution updated successfully.');
     }
 
     public function findAll()
     {
-        $institutions = Institution::findAll();
+        $institutions = Institution::all();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Institution successfully found',
-            'institutions' => $institutions
-        ], 200);
+        if (!$institutions) {
+            return GeneralController::jsonReturn(false, 400, [], 'Institutions not found.');
+        }
+
+        return GeneralController::jsonReturn(true, 200, $institutions, 'Institutions successfully found.');
     }
 
     public function findById(Institution $institution)
     {
-        return response()->json([
-            'success' => true,
-            'message' => 'Institution successfully found',
-            'institution' => $institution
-        ], 200);
+         if (!$institution) {
+            return GeneralController::jsonReturn(false, 400, [],  'Institution not found.');
+        }
+
+        return GeneralController::jsonReturn(true, 200, $institution, 'Institution successfully found.');
     }
 
     public function destroy(Institution $institution)
     {
-        if (!$institution->delete()) {
-            return response()->json([
-                'success' => false
-            ], 400);
+         if (!$institution->delete()) {
+            return GeneralController::jsonReturn(false, 400, $institution, 'Institution not deleted');
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Institution successfully deleted'
-        ], 200);
+        return GeneralController::jsonReturn(true, 200, $institution, 'Institution successfully deleted');
     }
 }

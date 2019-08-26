@@ -73,6 +73,11 @@ class Volunteer extends Model
         $idUserNotUnique = Volunteer::where('id_user', $req['id_user'])
         ->where('id_user', '<>', $data->id_user)->first();
 
+        if (!$idUserNotUnique) {
+             $idUserNotUnique = Institution::where('id_user', $req['id_user'])
+            ->where('id_user', '<>', $data->id_user)->first();
+        }
+
         $cpfNotUnique = Volunteer::where('cpf', $req['cpf'])
         ->where('id_user', '<>', $data->id_user)->first();
 
