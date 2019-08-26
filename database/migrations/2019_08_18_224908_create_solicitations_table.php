@@ -18,7 +18,7 @@ class CreateSolicitationsTable extends Migration
             $table->unsignedBigInteger('id_volunteer');
             $table->unsignedBigInteger('id_institution');
             $table->string('message')->nullable();
-            $table->boolean('approved');
+            $table->boolean('approved')->nullable()->default(0);
             $table->string('justification')->nullable();
 
             $table->foreign('id_volunteer')->references('id_volunteer')->on('volunteers');

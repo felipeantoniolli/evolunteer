@@ -71,7 +71,7 @@ class InstitutionController extends Controller
 
         foreach ($req as $index => $value) {
             if ($value != $institution[$index]) {
-            $institution->$index = $value;
+               $institution->$index = $value;
             }
         }
 

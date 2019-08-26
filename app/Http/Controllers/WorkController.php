@@ -4,82 +4,99 @@ namespace App\Http\Controllers;
 
 use App\Model\Work;
 use Illuminate\Http\Request;
+use Validator;
 
 class WorkController extends Controller
 {
     public function create(Request $request)
     {
         $work = $request->all();
-        if (!Work::create($work)) {
-            return response()->json([
-                'success' => false,
-                'work' => $work
-            ], 400);
+        $rules = Work::rules();
+
+        $validator = Validator::make(
+            $work,
+            $rules['rules'],
+            $rules['messages']
+        );
+
+        if ($validator->fails()) {
+            return GeneralController::jsonReturn(
+                false,
+                401,
+                $work,
+                'Validation error.',
+                $validator->errors()
+            );
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Successfully created Work',
-            'work' => $work
-        ], 201);
+        if (!Work::create($work)) {
+            return GeneralController::jsonReturn(true, 400, $work, 'Work not created.');
+        }
+
+        return GeneralController::jsonReturn(true, 201, $work, 'Successfully created Work.');
     }
 
     public function update(Request $request, Work $work)
     {
         $req = $request->all();
+        $rules = Work::rules();
+
+        $validator = Validator::make(
+            $req,
+            $rules['rules'],
+            $rules['messages']
+        );
+
+        if ($validator->fails()) {
+            return GeneralController::jsonReturn(
+                false,
+                401,
+                $req,
+                'Validation error.',
+                $validator->errors()
+            );
+        }
 
         foreach ($req as $index => $value) {
             if ($value != $work[$index]) {
-                $work[$index] = $value;
+                $work->$index = $value;
             }
         }
 
-        if (!$work->save()) {
-            return response()->json([
-                'success' => false,
-                'work' => $work
-            ], 400);
+        if (!$work = $work->save()) {
+            return GeneralController::jsonReturn(false, 400, $work, 'Work not updated.');
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Work updated successfully',
-            'work' => $work
-        ], 201);
+        return GeneralController::jsonReturn(true, 200, $req, 'Work updated successfully.');
     }
 
     public function findAll()
     {
-        $works = Work::findAll();
+        $works = Work::all();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Work successfully found',
-            'works' => $works
-        ], 200);
+        if (!$works) {
+            return GeneralController::jsonReturn(false, 400, [], 'Works not found.');
+        }
+
+        return GeneralController::jsonReturn(true, 200, $works, 'Works successfully found.');
     }
 
     public function findById(Work $work)
     {
-        return response()->json([
-            'success' => true,
-            'message' => 'Work successfully found',
-            'work' => $work
-        ], 200);
+        if (!$work) {
+            return GeneralController::jsonReturn(false, 400, [], 'Work not found.');
+        }
+
+        return GeneralController::jsonReturn(true, 200, $work, 'Work successfully found.');
     }
 
     public function destroy(Work $work)
     {
         if (!$work->delete()) {
-            return response()->json([
-                'success' => false
-            ], 400);
+            return GeneralController::jsonReturn(false, 400, $work, 'Work not deleted');
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Work successfully deleted'
-        ], 200);
+        return GeneralController::jsonReturn(true, 200, $work, 'Work successfully deleted');
     }
 }
 

@@ -71,7 +71,7 @@ class VolunteerController extends Controller
 
         foreach ($req as $index => $value) {
             if ($value != $volunteer[$index]) {
-            $volunteer->$index = $value;
+                $volunteer->$index = $value;
             }
         }
 
@@ -96,7 +96,7 @@ class VolunteerController extends Controller
     public function findById(Volunteer $volunteer)
     {
         if (!$volunteer) {
-            return GeneralController::jsonReturn(false, 400, [],  'Volunteer not found.');
+            return GeneralController::jsonReturn(false, 400, [], 'Volunteer not found.');
         }
 
         return GeneralController::jsonReturn(true, 200, $volunteer, 'Volunteer successfully found.');
