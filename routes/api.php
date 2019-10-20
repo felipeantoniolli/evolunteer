@@ -14,9 +14,15 @@ use Illuminate\Http\Request;
 |
 */
 
+Route::get("user/test", "UserController@testAxios");
+
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::post("user/login", "UserController@login");
+
+Route::post("user/register-volunteer", "UserController@registerVolunteer");
 
 Route::post("user/create", "UserController@create");
 Route::patch("user/update/{user}", "UserController@update");

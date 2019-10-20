@@ -5,10 +5,105 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\GeneralController;
 use App\Model\User;
+use App\Model\Volunteer;
+use App\Model\Institution;
 use Validator;
 
 class UserController extends Controller
 {
+    public function login(Request $request)
+    {
+        $data = $request->all();
+
+        $usernameOrEmail = $data['data'];
+
+        $password = GeneralController::parseToSha256($data['password']);
+
+        $user = User::where([
+                ['email', $usernameOrEmail],
+                ['password', $password]
+            ])->orWhere([
+                ['username', $usernameOrEmail],
+                ['password', $password]
+            ])->first();
+
+        if (!$user) {
+            return GeneralController::jsonReturn(false, 400, $user, 'Email or password fail.');
+        }
+
+        $user->token = GeneralController::generateToken($user->email, $user->password);
+
+        if ($user->type == 1) {
+            $user->volunteer = Volunteer::where('id_user', $user->id_user)->first();
+        } elseif ($user->type == 2) {
+            $user->institution = Institution::where('id_user', $user->id_user)->first();
+        }
+
+        return GeneralController::jsonReturn(true, 200, $user, 'Connected.');
+    }
+
+    public function registerVolunteer(Request $request)
+    {
+        $user = $request->all();
+        $user['active'] = 1;
+        $user['type'] = 1;
+        $volunteer = $user['volunteer'];
+
+        unset($user['volunteer']);
+
+        $rules = User::insertRules();
+
+        $validator = Validator::make(
+            $user,
+            $rules['rules'],
+            $rules['messages']
+        );
+
+        if ($validator->fails()) {
+            return GeneralController::jsonReturn(
+                false,
+                401,
+                $user,
+                'Validation error.',
+                $validator->errors()
+            );
+        }
+
+        $rules = Volunteer::insertRules();
+
+        $validator = Validator::make(
+            $volunteer,
+            $rules['rules'],
+            $rules['messages']
+        );
+
+        if ($validator->fails()) {
+            return GeneralController::jsonReturn(
+                false,
+                401,
+                $volunteer,
+                'Validation error.',
+                $validator->errors()
+            );
+        }
+
+        $user['password'] = GeneralController::parseToSha256($user['password']);
+
+        if (!$user = User::create($user)) {
+            return GeneralController::jsonReturn(true, 400, $user, 'User not created.');
+        }
+
+        $volunteer['id_user'] = $user->id_user;
+
+        if (!Volunteer::create($volunteer)) {
+            return GeneralController::jsonReturn(true, 400, $volunteer, 'Volunteer not created.');
+        }
+
+        $user['volunteer'] = $volunteer;
+
+        return GeneralController::jsonReturn(true, 201, $user, 'Successfully created user volunteer.');
+    }
+
     public function create(Request $request)
     {
         $user = $request->all();

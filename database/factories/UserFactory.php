@@ -34,6 +34,7 @@ $factory->define(User::class, function (Faker $faker) {
         'secondary_email' => null,
         'email_verified_at' => now(),
         'password' => $faker->sha256,
+        'token' => null,
         'remember_token' => Str::random(10)
     ];
 });

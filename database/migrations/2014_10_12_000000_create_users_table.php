@@ -29,6 +29,7 @@ class CreateUsersTable extends Migration
             $table->string('reference')->nullable();
             $table->boolean('active');
             $table->string('secondary_telephone', 11)->nullable();
+            $table->string('token')->nullable();
             $table->string('secondary_email', 50)->unique()->nullable();
 
             $table->timestamp('email_verified_at')->nullable();
