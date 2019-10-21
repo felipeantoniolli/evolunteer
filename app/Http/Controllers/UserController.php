@@ -32,7 +32,12 @@ class UserController extends Controller
         }
 
         $user->token = GeneralController::generateToken($user->email, $user->password);
+        $user->save();
 
+        return $this->getDataByUserId($user);
+    }
+
+    public function getDataByUserId($user) {
         if ($user->type == 1) {
             $user->volunteer = Volunteer::where('id_user', $user->id_user)->first();
         } elseif ($user->type == 2) {
@@ -222,6 +227,20 @@ class UserController extends Controller
         }
 
         return GeneralController::jsonReturn(true, 200, $user, 'User successfully found.');
+    }
+
+    public function findByToken(Request $request)
+    {
+        $req = $request->all();
+        $token = $req['token'];
+
+        return $token;
+
+        if (!$user = User::where('token', $token)->first()) {
+            return GeneralController::jsonReturn(false, 400, [],  'Token not found.');
+        }
+
+        return $this->getDataByUserId($user);
     }
 
     public function update(Request $request, User $user)

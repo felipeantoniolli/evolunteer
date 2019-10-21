@@ -21,6 +21,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::post("user/login", "UserController@login");
+Route::post("user/find-token", "UserController@findByToken");
 
 Route::post("user/register-volunteer", "UserController@registerVolunteer");
 Route::post("user/register-institution", "UserController@registerInstitution");
