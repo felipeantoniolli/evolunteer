@@ -71,7 +71,7 @@ class User extends Authenticatable
                 'type' => 'required',
                 'cep' => 'required|min:8|max:8',
                 'street' => 'required|min:3|max:100',
-                'number' => 'required|min:3|max:10',
+                'number' => 'required|min:1|max:10',
                 'city' => 'required|min:3|max:50',
                 'state' => 'required|min:2|max:2',
                 'secondary_email' => 'nullable|email|unique:users,email|unique:users,secondary_email'

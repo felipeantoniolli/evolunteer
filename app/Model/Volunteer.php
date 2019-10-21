@@ -28,7 +28,6 @@ class Volunteer extends Model
     {
         return [
             'rules' => [
-                'id_user' => 'required|unique:volunteers|unique:institutions',
                 'name' => 'required|min:3|max:50',
                 'last_name' => 'required|min:2|max:100',
                 'cpf' => 'required|min:11|max:11|unique:volunteers|unique:institutions',
@@ -61,7 +60,6 @@ class Volunteer extends Model
             'required' => 'Campo obrigatório.',
             'min' => 'Campo inválido.',
             'max' => 'Campo inválido.',
-            'id_user.unique' => 'ID do usuário em uso.',
             'cpf.unique' => 'CPF em uso.'
         ];
     }
@@ -72,6 +70,11 @@ class Volunteer extends Model
 
         $idUserNotUnique = Volunteer::where('id_user', $req['id_user'])
         ->where('id_user', '<>', $data->id_user)->first();
+
+        if (!$idUserNotUnique) {
+             $idUserNotUnique = Institution::where('id_user', $req['id_user'])
+            ->where('id_user', '<>', $data->id_user)->first();
+        }
 
         $cpfNotUnique = Volunteer::where('cpf', $req['cpf'])
         ->where('id_user', '<>', $data->id_user)->first();

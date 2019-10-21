@@ -3,82 +3,99 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Validator;
 
 class SolicitationController extends Controller
 {
     public function create(Request $request)
     {
         $solicitation = $request->all();
-        if (!Solicitation::create($solicitation)) {
-            return response()->json([
-                'success' => false,
-                'solicitation' => $solicitation
-            ], 400);
+        $rules = Solicitation::rules();
+
+        $validator = Validator::make(
+            $solicitation,
+            $rules['rules'],
+            $rules['messages']
+        );
+
+        if ($validator->fails()) {
+            return GeneralController::jsonReturn(
+                false,
+                401,
+                $solicitation,
+                'Validation error.',
+                $validator->errors()
+            );
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Successfully created Solicitation',
-            'solicitation' => $solicitation
-        ], 201);
+        if (!Solicitation::create($solicitation)) {
+            return GeneralController::jsonReturn(true, 400, $solicitation, 'Solicitation not created.');
+        }
+
+        return GeneralController::jsonReturn(true, 201, $solicitation, 'Successfully created Solicitation.');
     }
 
     public function update(Request $request, Solicitation $solicitation)
     {
         $req = $request->all();
+        $rules = Solicitation::rules();
+
+        $validator = Validator::make(
+            $req,
+            $rules['rules'],
+            $rules['messages']
+        );
+
+        if ($validator->fails()) {
+            return GeneralController::jsonReturn(
+                false,
+                401,
+                $req,
+                'Validation error.',
+                $validator->errors()
+            );
+        }
 
         foreach ($req as $index => $value) {
             if ($value != $solicitation[$index]) {
-                $solicitation[$index] = $value;
+                $solicitation->$index = $value;
             }
         }
 
-        if (!$solicitation->save()) {
-            return response()->json([
-                'success' => false,
-                'solicitation' => $solicitation
-            ], 400);
+        if (!$solicitation = $solicitation->save()) {
+            return GeneralController::jsonReturn(false, 400, $solicitation, 'Solicitation not updated.');
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Solicitation updated successfully',
-            'solicitation' => $solicitation
-        ], 201);
+        return GeneralController::jsonReturn(true, 200, $req, 'Solicitation updated successfully.');
     }
 
     public function findAll()
     {
-        $solicitations = Solicitation::findAll();
+        $solicitations = Solicitation::all();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Solicitation successfully found',
-            'solicitations' => $solicitations
-        ], 200);
+        if (!$solicitations) {
+            return GeneralController::jsonReturn(false, 400, [], 'Solicitations not found.');
+        }
+
+        return GeneralController::jsonReturn(true, 200, $solicitations, 'Solicitations successfully found.');
     }
 
     public function findById(Solicitation $solicitation)
     {
-        return response()->json([
-            'success' => true,
-            'message' => 'Solicitation successfully found',
-            'solicitation' => $solicitation
-        ], 200);
+        if (!$solicitation) {
+            return GeneralController::jsonReturn(false, 400, [], 'Solicitation not found.');
+        }
+
+        return GeneralController::jsonReturn(true, 200, $solicitation, 'Solicitation successfully found.');
     }
 
     public function destroy(Solicitation $solicitation)
     {
         if (!$solicitation->delete()) {
-            return response()->json([
-                'success' => false
-            ], 400);
+            return GeneralController::jsonReturn(false, 400, $solicitation, 'Solicitation not deleted');
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Solicitation successfully deleted'
-        ], 200);
+        return GeneralController::jsonReturn(true, 200, $solicitation, 'Solicitation successfully deleted');
     }
 }
 

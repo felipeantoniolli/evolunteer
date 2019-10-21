@@ -42,14 +42,84 @@ class UserController extends Controller
         return GeneralController::jsonReturn(true, 200, $user, 'Connected.');
     }
 
+    public function registerInstitution(Request $request)
+    {
+        $user = $request->all();
+        $user = $user[0];
+
+        $user['active'] = 1;
+        $user['type'] = 2;
+
+        $institution = $user['institution'];
+
+        unset($user['volunteer']);
+        unset($user['institution']);
+
+        $rules = User::insertRules();
+
+        $validator = Validator::make(
+            $user,
+            $rules['rules'],
+            $rules['messages']
+        );
+
+        if ($validator->fails()) {
+            return GeneralController::jsonReturn(
+                false,
+                401,
+                $user,
+                'Validation error.',
+                $validator->errors()
+            );
+        }
+
+        $rules = Institution::insertRules();
+
+        $validator = Validator::make(
+            $institution,
+            $rules['rules'],
+            $rules['messages']
+        );
+
+        if ($validator->fails()) {
+            return GeneralController::jsonReturn(
+                false,
+                401,
+                $institution,
+                'Validation error.',
+                $validator->errors()
+            );
+        }
+
+        $user['password'] = GeneralController::parseToSha256($user['password']);
+
+        if (!$user = User::create($user)) {
+            return GeneralController::jsonReturn(true, 400, $user, 'User not created.');
+        }
+
+        $institution['id_user'] = $user['id_user'];
+
+        if (!Institution::create($institution)) {
+            return GeneralController::jsonReturn(true, 400, $institution, 'Institution not created.');
+        }
+
+        $user['institution'] = $institution;
+
+        return GeneralController::jsonReturn(true, 201, $user, 'Successfully created user institution.');
+    }
+
     public function registerVolunteer(Request $request)
     {
         $user = $request->all();
+        $user = $user[0];
+
         $user['active'] = 1;
         $user['type'] = 1;
+
         $volunteer = $user['volunteer'];
 
         unset($user['volunteer']);
+        unset($user['institution']);
 
         $rules = User::insertRules();
 
@@ -93,7 +163,7 @@ class UserController extends Controller
             return GeneralController::jsonReturn(true, 400, $user, 'User not created.');
         }
 
-        $volunteer['id_user'] = $user->id_user;
+        $volunteer['id_user'] = $user['id_user'];
 
         if (!Volunteer::create($volunteer)) {
             return GeneralController::jsonReturn(true, 400, $volunteer, 'Volunteer not created.');
@@ -139,7 +209,7 @@ class UserController extends Controller
         $users = User::all();
 
         if (!$users) {
-            return GeneralController::jsonReturn(false, 400, $users, 'Users not found.');
+            return GeneralController::jsonReturn(false, 400, [], 'Users not found.');
         }
 
         return GeneralController::jsonReturn(true, 200, $users, 'Users successfully found.');

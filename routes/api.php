@@ -23,7 +23,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::post("user/login", "UserController@login");
 
 Route::post("user/register-volunteer", "UserController@registerVolunteer");
-
+Route::post("user/register-institution", "UserController@registerInstitution");
 Route::post("user/create", "UserController@create");
 Route::patch("user/update/{user}", "UserController@update");
 Route::get('user/find-all', "UserController@findAll");

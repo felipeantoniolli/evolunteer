@@ -20,4 +20,27 @@ class Solicitation extends Model
         'approved',
         'justification'
     ];
+
+    public static function rules()
+    {
+        return [
+            'rules' => [
+                'id_volunteer' => 'required',
+                'id_institution' => 'required',
+                'message' => 'nullable',
+                'approved' => 'nullable',
+                'justification' => 'nullable'
+            ],
+            'messages' => self::messagesRules()
+        ];
+    }
+
+    public static function messagesRules()
+    {
+        return [
+            'required' => 'Campo obrigatório.',
+            'min' => 'Campo inválido.',
+            'max' => 'Campo inválido.'
+        ];
+    }
 }
