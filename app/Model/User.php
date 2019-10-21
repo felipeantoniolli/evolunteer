@@ -4,6 +4,7 @@ namespace App\Model;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Laravel\Passport\HasApiTokens;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -11,6 +12,7 @@ class User extends Authenticatable
 {
     use Notifiable;
     use SoftDeletes;
+    use HasApiTokens;
     protected $primaryKey = 'id_user';
 
     /**
@@ -20,7 +22,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'id_user',
-        'user',
+        'username',
         'email',
         'password',
         'telephone',
@@ -34,7 +36,10 @@ class User extends Authenticatable
         'reference',
         'active',
         'secondary_telephone',
-        'secondary_email'
+        'secondary_email',
+        'token',
+        'volunteer',
+        'institution'
     ];
 
     /**
@@ -43,7 +48,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token', 'deleted_at'
+        'password','remember_token', 'deleted_at'
     ];
 
     /**
@@ -54,4 +59,96 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public static function insertRules()
+    {
+        return [
+            'rules' => [
+                'username' => 'required|min:3|max:25|unique:users',
+                'email' => 'required|email|unique:users',
+                'password' => 'required',
+                'telephone' => 'required|min:8|max:11',
+                'type' => 'required',
+                'cep' => 'required|min:8|max:8',
+                'street' => 'required|min:3|max:100',
+                'number' => 'required|min:1|max:10',
+                'city' => 'required|min:3|max:50',
+                'state' => 'required|min:2|max:2',
+                'secondary_email' => 'nullable|email|unique:users,email|unique:users,secondary_email'
+            ],
+            'messages' => self::messagesRules()
+        ];
+    }
+
+    public static function updateRules()
+    {
+        return [
+            'rules' => [
+                'username' => 'required|min:3|max:25',
+                'email' => 'required|email',
+                'password' => 'required',
+                'telephone' => 'required|min:8|max:11',
+                'type' => 'required',
+                'cep' => 'required|min:8|max:8',
+                'street' => 'required|min:3|max:100',
+                'number' => 'required|min:3|max:10',
+                'city' => 'required|min:3|max:50',
+                'state' => 'required|min:2|max:2',
+                'secondary_email' => 'nullable|email'
+            ],
+            'messages' => self::messagesRules()
+        ];
+    }
+
+    public static function messagesRules()
+    {
+        return [
+            'required' => 'Campo obrigatório.',
+            'min' => 'Campo inválido.',
+            'max' => 'Campo inválido.',
+            'username.unique' => 'Este usuário já está em uso.',
+            'email' => 'Email inválido.',
+            'email.unique' => 'Email em uso.',
+            'secondary_email.unique' => 'Email em uso.'
+        ];
+    }
+
+    public static function uniqueRules($req, $data)
+    {
+        $errors = [];
+
+        var_dump($data->id_user);
+        die;
+
+        $userNotUnique = User::where('username', $req['username'])
+        ->where('id_user', '<>', $data->id_user)->first();
+
+        var_dump($userNotUnique);
+        die;
+
+        $emailNotUnique = User::where('email', $req['email'])
+        ->where('id_user', '<>', $data->id_user)->first();
+
+        $secondayEmailNotUnique = null;
+
+        if ($req['secondary_email']) {
+            $secondayEmailNotUnique = User::where('secondary_email', $req['secondary_email'])
+            ->where('email', $req['secondary_email'])
+            ->where('id_user', '<>', $data->id_user)->fisrt();
+        }
+
+        if ($userNotUnique) {
+            $errors['user'] = ['Usuário em uso'];
+        }
+
+        if ($emailNotUnique) {
+            $errors['email'] = ['Email em uso'];
+        }
+
+        if ($secondayEmailNotUnique) {
+            $errors['secondary_email'] = ['Email em uso'];
+        }
+
+        return $errors;
+    }
 }

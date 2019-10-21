@@ -19,4 +19,25 @@ class Work extends Model
         'content',
         'work_date'
     ];
+
+    public static function rules()
+    {
+        return [
+            'rules' => [
+                'id_institution' => 'required',
+                'name' => 'required|min:3|max:255',
+                'work_date' => 'required|date_format:Y-m-d H:i:s'
+            ],
+            'messages' => self::messagesRules()
+        ];
+    }
+
+    public static function messagesRules()
+    {
+        return [
+            'required' => 'Campo obrigatório.',
+            'min' => 'Campo inválido.',
+            'max' => 'Campo inválido.'
+        ];
+    }
 }
