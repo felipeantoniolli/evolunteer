@@ -39,7 +39,8 @@ class User extends Authenticatable
         'secondary_email',
         'token',
         'volunteer',
-        'institution'
+        'institution',
+        'interest'
     ];
 
     /**

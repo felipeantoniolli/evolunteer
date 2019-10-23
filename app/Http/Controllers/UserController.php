@@ -7,6 +7,7 @@ use App\Http\Controllers\GeneralController;
 use App\Model\User;
 use App\Model\Volunteer;
 use App\Model\Institution;
+use App\Model\Interest;
 use Validator;
 
 class UserController extends Controller
@@ -43,6 +44,8 @@ class UserController extends Controller
         } elseif ($user->type == 2) {
             $user->institution = Institution::where('id_user', $user->id_user)->first();
         }
+
+        $user->interest = Interest::where('id_user', $user->id_user)->get();
 
         return GeneralController::jsonReturn(true, 200, $user, 'Connected.');
     }
@@ -233,8 +236,6 @@ class UserController extends Controller
     {
         $req = $request->all();
         $token = $req['token'];
-
-        return $token;
 
         if (!$user = User::where('token', $token)->first()) {
             return GeneralController::jsonReturn(false, 400, [],  'Token not found.');
