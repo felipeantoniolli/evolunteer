@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Model\User;
+use App\Model\Interest;
 use App\Model\Institution;
 use Illuminate\Http\Request;
 use Validator;
@@ -34,6 +36,50 @@ class InstitutionController extends Controller
         }
 
         return GeneralController::jsonReturn(true, 201, $institution, 'Successfully created Institution.');
+    }
+
+    public function getInstitutionByLocale(Request $request)
+    {
+        $req = $request->all();
+
+        $city = $req['city'];
+        $state = $req['state'];
+
+        $user = User::where([
+                ['city', $city],
+                ['type', 2]
+            ])->orWhere([
+                ['state', $state],
+                ['type', 2]
+            ])->get();
+
+        if (!$user) {
+            return GeneralController::jsonReturn(true, 200, null, 'Successfully seach institutions');
+        }
+
+        $usersId[] = null;
+        $users = [];
+        foreach ($user as $one) {
+            $users[$one->id_user] = $one;
+            $usersId[] = $one->id_user;
+        }
+
+        $institutions = Institution::whereIn('id_user', $usersId)->get();
+        $interests = Interest::whereIn('id_user', $usersId)->get();
+
+        $json = [];
+        foreach ($institutions as $one) {
+            $json[$one->id_user] = [
+                'user' => $users[$one->id_user],
+                'institution' => $one
+            ];
+        }
+
+        foreach ($interests as $one) {
+           $json[$one->id_user]['interest'] = $one;
+        }
+
+        return GeneralController::jsonReturn(true, 200, $json, 'Successfully seach institutions');
     }
 
     public function update(Request $request, Institution $institution)

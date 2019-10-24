@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\GeneralController;
+use App\Http\Controllers\InstitutionController;
 use Illuminate\Http\Request;
 
 /*
@@ -22,6 +23,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::post("user/login", "UserController@login");
 Route::post("user/find-token", "UserController@findByToken");
+
+Route::post("institution/find-by-locale", "InstitutionController@getInstitutionByLocale");
 
 Route::post("user/register-volunteer", "UserController@registerVolunteer");
 Route::post("user/register-institution", "UserController@registerInstitution");
