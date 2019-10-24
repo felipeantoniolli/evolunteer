@@ -67,16 +67,24 @@ class InstitutionController extends Controller
         $institutions = Institution::whereIn('id_user', $usersId)->get();
         $interests = Interest::whereIn('id_user', $usersId)->get();
 
-        $json = [];
-        foreach ($institutions as $one) {
-            $json[$one->id_user] = [
-                'user' => $users[$one->id_user],
-                'institution' => $one
-            ];
+        $idInterests = [];
+        foreach($interests as $one) {
+            $idInterests[$one->id_user] = $one;
         }
 
-        foreach ($interests as $one) {
-           $json[$one->id_user]['interest'] = $one;
+        $json = [];
+        foreach ($institutions as $one) {
+            $interest = null;
+
+            if (array_key_exists($one->id_user, $idInterests)) {
+                $interest = $idInterests[$one->id_user];
+            }
+
+            $json[] = [
+                'user' => $users[$one->id_user],
+                'institution' => $one,
+                'interest' => $interest
+            ];
         }
 
         return GeneralController::jsonReturn(true, 200, $json, 'Successfully seach institutions');
