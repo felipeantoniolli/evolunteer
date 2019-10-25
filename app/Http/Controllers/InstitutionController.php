@@ -38,7 +38,7 @@ class InstitutionController extends Controller
         return GeneralController::jsonReturn(true, 201, $institution, 'Successfully created Institution.');
     }
 
-    public function getInstitutionByLocale(Request $request)
+    public function getInstitutionsByLocale(Request $request)
     {
         $req = $request->all();
 
@@ -67,23 +67,24 @@ class InstitutionController extends Controller
         $institutions = Institution::whereIn('id_user', $usersId)->get();
         $interests = Interest::whereIn('id_user', $usersId)->get();
 
-        $idInterests = [];
-        foreach($interests as $one) {
-            $idInterests[$one->id_user] = $one;
+        $institutionsId[] = null;
+        foreach ($institutions as $one) {
+            $institutionsId[$one->id_user] = $one;
         }
 
-        $json = [];
-        foreach ($institutions as $one) {
-            $interest = null;
+        foreach ($users as $one) {
+            $one->institution = $institutionsId[$one->id_user];
 
-            if (array_key_exists($one->id_user, $idInterests)) {
-                $interest = $idInterests[$one->id_user];
+            $interest = [];
+            foreach ($interests as $item) {
+                if ($item->id_user == $one->id_user) {
+                    $interest[] = $item;
+                }
             }
 
+            $one->interest = $interest;
             $json[] = [
-                'user' => $users[$one->id_user],
-                'institution' => $one,
-                'interest' => $interest
+                'user' => $one
             ];
         }
 
