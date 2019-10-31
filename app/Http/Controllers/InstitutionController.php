@@ -91,6 +91,61 @@ class InstitutionController extends Controller
         return GeneralController::jsonReturn(true, 200, $json, 'Successfully seach institutions');
     }
 
+    public function searchInstitutions(Request $request)
+    {
+        $req = $request->all();
+
+        $institutions = Institution::where('fantasy', 'like', '%' .  $req['search'] . '%')->get();
+
+        if (!$institutions) {
+            return GeneralController::jsonReturn(true, 200, null, 'Successfully seach institutions');
+        }
+
+        $institutionsData = [];
+        $usersId = [];
+        foreach ($institutions as $one) {
+            $institutionsData[$one->id_user] = $one;
+            $usersId[$one->id_user] = $one->id_user;
+        }
+
+        $users = User::whereIn('id_user', $usersId)->get();
+
+        if (!$users) {
+            return GeneralController::jsonReturn(true, 200, null, 'Successfully seach institutions');
+        }
+
+        $interests = Interest::whereIn('id_user', $usersId)->get();
+
+        $interestsData = [];
+        foreach ($interests as $one) {
+            $interestsData[$one->id_user][$one->id_interest] = $one;
+        }
+
+        foreach ($users as $one) {
+            $one->institution = $institutionsData[$one->id_user];
+
+            if (array_key_exists($one->id_user, $interestsData)) {
+                $interests = $interestsData[$one->id_user];
+
+                $interest = null;
+                foreach ($interests as $item) {
+                    if ($item->id_user == $one->id_user) {
+                        $interest[] = $item;
+                    }
+                }
+            } else {
+                $interest = [];
+            }
+
+            $one->interest = $interest;
+            $json[] = [
+                'user' => $one
+            ];
+        }
+
+        return GeneralController::jsonReturn(true, 200, $json, 'Successfully seach institutions');
+    }
+
     public function update(Request $request, Institution $institution)
     {
         $req = $request->all();

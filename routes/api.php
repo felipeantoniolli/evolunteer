@@ -29,6 +29,7 @@ Route::post("institution/find-by-locale", "InstitutionController@getInstitutions
 Route::post("volunteer/find-pending-solicitations", "VolunteerController@getVolunteersBySolicitationPending");
 Route::post("volunteer/find-approved-solicitations", "VolunteerController@getVolunteersBySolicitationApproved");
 Route::post("solicitation/approve-solicitation", "SolicitationController@approveSolicitation");
+Route::post("institution/search-institutions", "InstitutionController@searchInstitutions");
 
 Route::post("user/register-volunteer", "UserController@registerVolunteer");
 Route::post("user/register-institution", "UserController@registerInstitution");
