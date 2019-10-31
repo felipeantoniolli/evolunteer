@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\InstitutionController;
+use App\Http\Controllers\VolunteerController;
 use Illuminate\Http\Request;
 
 /*
@@ -25,6 +26,9 @@ Route::post("user/login", "UserController@login");
 Route::post("user/find-token", "UserController@findByToken");
 
 Route::post("institution/find-by-locale", "InstitutionController@getInstitutionsByLocale");
+Route::post("volunteer/find-pending-solicitations", "VolunteerController@getVolunteersBySolicitationPending");
+Route::post("volunteer/find-approved-solicitations", "VolunteerController@getVolunteersBySolicitationApproved");
+Route::post("solicitation/approve-solicitation", "SolicitationController@approveSolicitation");
 
 Route::post("user/register-volunteer", "UserController@registerVolunteer");
 Route::post("user/register-institution", "UserController@registerInstitution");

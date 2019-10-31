@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Model\Solicitation;
 use Validator;
 
 class SolicitationController extends Controller
@@ -96,6 +97,25 @@ class SolicitationController extends Controller
         }
 
         return GeneralController::jsonReturn(true, 200, $solicitation, 'Solicitation successfully deleted');
+    }
+
+    public function approveSolicitation(Request $request)
+    {
+        $req = $request->all();
+
+        $solicitation = Solicitation::where('id_solicitation', $req['id_solicitation'])->first();
+
+        if (!$solicitation) {
+            return GeneralController::jsonReturn(false, 400, [], 'Solicitation not found.');
+        }
+
+        $solicitation->approved = 1;
+
+        if (!$solicitation = $solicitation->save()) {
+            return GeneralController::jsonReturn(false, 400, [], 'Error updating solicitation.');
+        }
+
+        return GeneralController::jsonReturn(true, 200, $solicitation, 'Solicitations successfully updated.');
     }
 }
 

@@ -40,7 +40,8 @@ class User extends Authenticatable
         'token',
         'volunteer',
         'institution',
-        'interest'
+        'interest',
+        'solicitation'
     ];
 
     /**

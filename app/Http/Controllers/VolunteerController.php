@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Model\Interest;
+use App\Model\Solicitation;
+use App\Model\User;
 use App\Model\Volunteer;
 use Illuminate\Http\Request;
 use Validator;
@@ -109,5 +112,82 @@ class VolunteerController extends Controller
         }
 
         return GeneralController::jsonReturn(true, 200, $volunteer, 'Volunteer successfully deleted');
+    }
+
+    public function generateVolunteersListBySolicitation($solicitations) {
+        $volunteerIds = [];
+        $dataSolicitations = [];
+
+        foreach ($solicitations as $one) {
+            $volunteerIds[$one->id_volunteer] = $one->id_volunteer;
+            $dataSolicitations[$one->id_volunteer] = $one;
+        }
+
+        $volunteers = Volunteer::whereIn('id_volunteer', $volunteerIds)->get();
+
+        $userIds = [];
+        $dataVolunteers = [];
+        foreach ($volunteers as $one) {
+            $userIds[$one->id_volunteer] = $one->id_user;
+            $dataVolunteers[$one->id_user] = $one;
+        }
+
+        $users = User::whereIn('id_user', $userIds)->get();
+
+        $interests = Interest::whereIn('id_user', $userIds)->get();
+
+        $json = [];
+        foreach ($users as $one) {
+            $volunteer = $dataVolunteers[$one->id_user];
+            $solicitation = $dataSolicitations[$volunteer->id_volunteer];
+            $one->volunteer = $volunteer;
+            $one->solicitation = $solicitation;
+            $interest = [];
+
+            foreach ($interests as $item) {
+                if ($item->id_user == $one->id_user) {
+                    $interest[] = $item;
+                }
+            }
+
+            $one->interest = $interest;
+            $json[] = [
+                'user' => $one,
+            ];
+        }
+
+        return $json;
+    }
+
+    public function getVolunteersBySolicitationPending(Request $request)
+    {
+        $req = $request->all();
+
+        $solicitations = Solicitation::where('id_institution', $req['id_institution'])
+            ->where('approved', 0)->get();
+
+        if (!$solicitations) {
+            return GeneralController::jsonReturn(false, 400, [], 'Solicitations not found.');
+        }
+
+        $json = $this->generateVolunteersListBySolicitation($solicitations);
+
+        return GeneralController::jsonReturn(true, 200, $json, 'Solicitations successfully found.');
+    }
+
+    public function getVolunteersBySolicitationApproved(Request $request)
+    {
+        $req = $request->all();
+
+        $solicitations = Solicitation::where('id_institution', $req['id_institution'])
+            ->where('approved', 1)->get();
+
+        if (!$solicitations) {
+            return GeneralController::jsonReturn(false, 400, [], 'Solicitations not found.');
+        }
+
+        $json = $this->generateVolunteersListBySolicitation($solicitations);
+
+        return GeneralController::jsonReturn(true, 200, $json, 'Solicitations successfully found.');
     }
 }
