@@ -119,14 +119,8 @@ class User extends Authenticatable
     {
         $errors = [];
 
-        var_dump($data->id_user);
-        die;
-
         $userNotUnique = User::where('username', $req['username'])
         ->where('id_user', '<>', $data->id_user)->first();
-
-        var_dump($userNotUnique);
-        die;
 
         $emailNotUnique = User::where('email', $req['email'])
         ->where('id_user', '<>', $data->id_user)->first();

@@ -64,9 +64,11 @@ Route::patch("work/update/{work}", "WorkController@update");
 Route::get("work/find-all", "WorkController@findAll");
 Route::get("work/find/{work}", "WorkController@findById");
 Route::delete("work/delete/{work}", "WorkController@destroy");
+Route::post("work/find-by-institution", "WorkController@findByInstitutionId");
 
 Route::post("solicitation/create", "SolicitationController@create");
 Route::patch("solicitation/update/{solicitation}", "SolicitationController@update");
 Route::get("solicitation/find-all", "SolicitationController@findAll");
 Route::get("solicitation/find/{solicitation}", "SolicitationController@findById");
 Route::delete("solicitation/delete/{solicitation}", "SolicitationController@destroy");
+Route::post("solicitation/find-by-user-and-institutuon", "SolicitationController@findSolicitationPendingByUserAndInstitution");

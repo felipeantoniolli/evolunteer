@@ -70,6 +70,21 @@ class SolicitationController extends Controller
         return GeneralController::jsonReturn(true, 200, $req, 'Solicitation updated successfully.');
     }
 
+    public function findSolicitationPendingByUserAndInstitution(Request $request) {
+        $req = $request->all();
+
+        $solicitation = Solicitation::where([
+            ['id_volunteer', $req['id_volunteer']],
+            ['id_institution', $req['id_institution']]
+        ])->first();
+
+        if (!$solicitation) {
+            return GeneralController::jsonReturn(true, 200, null, 'The user has no solicitations from this institution.');
+        }
+
+        return GeneralController::jsonReturn(true, 200, $solicitation, 'Solicitation find successfully.');
+    }
+
     public function findAll()
     {
         $solicitations = Solicitation::all();

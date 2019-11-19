@@ -90,6 +90,15 @@ class WorkController extends Controller
         return GeneralController::jsonReturn(true, 200, $work, 'Work successfully found.');
     }
 
+    public function findByInstitutionId(Request $request)
+    {
+        $req = $request->all();
+
+        $works = Work::where('id_institution', $req['id_institution'])->get();
+
+        return GeneralController::jsonReturn(true, 200, $works, 'Works successfully found.');
+    }
+
     public function destroy(Work $work)
     {
         if (!$work->delete()) {
