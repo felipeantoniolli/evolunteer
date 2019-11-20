@@ -28,7 +28,7 @@ Route::post("user/find-token", "UserController@findByToken");
 Route::post("institution/find-by-locale", "InstitutionController@getInstitutionsByLocale");
 Route::post("volunteer/find-pending-solicitations", "VolunteerController@getVolunteersBySolicitationPending");
 Route::post("volunteer/find-approved-solicitations", "VolunteerController@getVolunteersBySolicitationApproved");
-Route::post("solicitation/approve-solicitation", "SolicitationController@approveSolicitation");
+Route::post("solicitation/status-solicitation", "SolicitationController@updateStatusSolicitation");
 Route::post("institution/search-institutions", "InstitutionController@searchInstitutions");
 
 Route::post("user/register-volunteer", "UserController@registerVolunteer");

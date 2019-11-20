@@ -48,9 +48,6 @@ class InstitutionController extends Controller
         $user = User::where([
                 ['city', $city],
                 ['type', 2]
-            ])->orWhere([
-                ['state', $state],
-                ['type', 2]
             ])->get();
 
         if (!$user) {

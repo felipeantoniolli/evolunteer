@@ -114,7 +114,7 @@ class SolicitationController extends Controller
         return GeneralController::jsonReturn(true, 200, $solicitation, 'Solicitation successfully deleted');
     }
 
-    public function approveSolicitation(Request $request)
+    public function updateStatusSolicitation(Request $request)
     {
         $req = $request->all();
 
@@ -124,7 +124,7 @@ class SolicitationController extends Controller
             return GeneralController::jsonReturn(false, 400, [], 'Solicitation not found.');
         }
 
-        $solicitation->approved = 1;
+        $solicitation->approved = $req['approved'];
 
         if (!$solicitation = $solicitation->save()) {
             return GeneralController::jsonReturn(false, 400, [], 'Error updating solicitation.');
