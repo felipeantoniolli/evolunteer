@@ -21,6 +21,10 @@ class Solicitation extends Model
         'justification'
     ];
 
+    protected $hidden = [
+        'password', 'remember_token', 'updated_at', 'created_at', 'deleted_at'
+    ];
+
     public static function rules()
     {
         return [

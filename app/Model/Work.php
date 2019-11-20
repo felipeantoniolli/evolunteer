@@ -20,6 +20,10 @@ class Work extends Model
         'work_date'
     ];
 
+    protected $hidden = [
+        'password', 'remember_token', 'updated_at', 'created_at', 'deleted_at'
+    ];
+
     public static function rules()
     {
         return [

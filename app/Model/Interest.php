@@ -16,4 +16,8 @@ class Interest extends Model
         'id_user',
         'type'
     ];
+
+    protected $hidden = [
+        'password', 'remember_token', 'updated_at', 'created_at', 'deleted_at'
+    ];
 }

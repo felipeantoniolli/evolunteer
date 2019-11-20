@@ -24,6 +24,10 @@ class Volunteer extends Model
         'gender'
     ];
 
+    protected $hidden = [
+        'password', 'remember_token', 'updated_at', 'created_at', 'deleted_at'
+    ];
+
     public static function insertRules()
     {
         return [

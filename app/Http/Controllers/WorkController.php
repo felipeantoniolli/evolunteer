@@ -94,7 +94,13 @@ class WorkController extends Controller
     {
         $req = $request->all();
 
-        $works = Work::where('id_institution', $req['id_institution'])->get();
+        $date = date('Y-m-d h:i:s');
+        $works = Work::where([
+            ['id_institution', $req['id_institution']],
+            ['work_date', '>', $date]
+        ])
+        ->orderBy('work_date')
+        ->get();
 
         return GeneralController::jsonReturn(true, 200, $works, 'Works successfully found.');
     }

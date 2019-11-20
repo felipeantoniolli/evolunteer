@@ -20,6 +20,10 @@ class Institution extends Model
         'cnpj'
     ];
 
+    protected $hidden = [
+        'password', 'remember_token', 'updated_at', 'created_at', 'deleted_at'
+    ];
+
     public static function insertRules()
     {
         return [
