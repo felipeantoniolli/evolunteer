@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Model\Institution;
+use App\Model\User;
+use App\Model\Interest;
 use App\Model\Solicitation;
+use Illuminate\Http\Request;
 use Validator;
 
 class SolicitationController extends Controller
@@ -75,7 +78,8 @@ class SolicitationController extends Controller
 
         $solicitation = Solicitation::where([
             ['id_volunteer', $req['id_volunteer']],
-            ['id_institution', $req['id_institution']]
+            ['id_institution', $req['id_institution']],
+            ['approved', '<>', 3]
         ])->first();
 
         if (!$solicitation) {
@@ -83,6 +87,63 @@ class SolicitationController extends Controller
         }
 
         return GeneralController::jsonReturn(true, 200, $solicitation, 'Solicitation find successfully.');
+    }
+
+    public function findByVolunteer(Request $request)
+    {
+        $req = $request->all();
+
+        $solicitations = Solicitation::where([
+            ['id_volunteer', $req['id_volunteer']],
+            ['approved', '<>', 3]
+        ])->get();
+
+        if (!$solicitations) {
+            return GeneralController::jsonReturn(true, 200, null, 'The user has no solicitations from this institution.');
+        }
+
+        $institutionsId = [];
+        foreach ($solicitations as $one) {
+            $institutionsId[$one->id_institution] = $one->id_institution;
+        }
+
+        $institutions = Institution::whereIn('id_institution', $institutionsId)->get();
+
+        if (!$institutions) {
+            return GeneralController::jsonReturn(true, 200, null, 'The user has no solicitations from this institution.');
+        }
+
+        $usersId = [];
+        $institutionsData = [];
+        foreach ($institutions as $one) {
+            $usersId[$one->id_user] = $one->id_user;
+            $institutionsData[$one->id_user] = $one;
+        }
+
+        $users = User::whereIn('id_user', $usersId)->get();
+        $interests = Interest::whereIn('id_user', $usersId)->get();
+
+        if (!$users) {
+            return GeneralController::jsonReturn(true, 200, null, 'The user has no solicitations from this institution.');
+        }
+
+        foreach ($users as $one) {
+            $one->institution = $institutionsData[$one->id_user];
+
+            $interest = [];
+            foreach ($interests as $item) {
+                if ($item->id_user == $one->id_user) {
+                    $interest[] = $item;
+                }
+            }
+
+            $one->interest = $interest;
+            $json[] = [
+                'user' => $one
+            ];
+        }
+
+        return GeneralController::jsonReturn(true, 200, $json, 'Successfully find solicitations');
     }
 
     public function findAll()

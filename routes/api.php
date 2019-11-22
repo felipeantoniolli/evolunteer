@@ -74,5 +74,6 @@ Route::get("solicitation/find-all", "SolicitationController@findAll");
 Route::get("solicitation/find/{solicitation}", "SolicitationController@findById");
 Route::delete("solicitation/delete/{solicitation}", "SolicitationController@destroy");
 Route::post("solicitation/find-by-user-and-institutuon", "SolicitationController@findSolicitationPendingByUserAndInstitution");
+Route::post("solicitation/find-by-volunteer", "SolicitationController@findByVolunteer");
 
 Route::post("calendar/find-by-volunteer", "CalendarController@getCalendarByVolunteerId");
