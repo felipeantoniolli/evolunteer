@@ -8,6 +8,7 @@ use App\Model\User;
 use App\Model\Volunteer;
 use App\Model\Institution;
 use App\Model\Interest;
+use Exception;
 use Validator;
 
 class UserController extends Controller
@@ -180,6 +181,146 @@ class UserController extends Controller
         $user['volunteer'] = $volunteer;
 
         return GeneralController::jsonReturn(true, 201, $user, 'Successfully created user volunteer.');
+    }
+
+    public function updateVolunteer(Request $request)
+    {
+        $user = $request->all();
+        $user = $user[0];
+
+        $volunteer = $user['volunteer'];
+
+        unset($user['password']);
+        unset($user['volunteer']);
+        unset($user['interest']);
+
+        $rules = User::updateRules();
+
+        $validator = Validator::make(
+            $user,
+            $rules['rules'],
+            $rules['messages']
+        );
+
+        if ($validator->fails()) {
+            return GeneralController::jsonReturn(
+                false,
+                401,
+                $user,
+                'Validation error.',
+                $validator->errors()
+            );
+        }
+
+        $rules = Volunteer::updateRules();
+
+        $validator = Validator::make(
+            $volunteer,
+            $rules['rules'],
+            $rules['messages']
+        );
+
+        if ($validator->fails()) {
+            return GeneralController::jsonReturn(
+                false,
+                401,
+                $volunteer,
+                'Validation error.',
+                $validator->errors()
+            );
+        }
+
+        try {
+            $userData = User::where('id_user', $user['id_user'])->first();
+
+            if (!$userData->update($user)) {
+                return GeneralController::jsonReturn(false, 400, $user, 'User not updated.');
+            }
+
+            $volunteer['id_user'] = $user['id_user'];
+
+            $volunteerData = Volunteer::where('id_volunteer', $volunteer['id_volunteer']);
+
+            if (!$volunteerData->update($volunteer)) {
+                return GeneralController::jsonReturn(false, 400, $volunteer, 'Volunteer not created.');
+            }
+
+            $user['volunteer'] = $volunteer;
+
+            return GeneralController::jsonReturn(true, 201, $user, 'Successfully updated user volunteer.');
+        } catch (Exception $exception) {
+            return GeneralController::jsonReturn(false, 400, $user, 'User not updated.', $exception);
+        }
+    }
+
+    public function updateInstitution(Request $request)
+    {
+        $user = $request->all();
+        $user = $user[0];
+
+        $institution = $user['institution'];
+
+        unset($user['password']);
+        unset($user['institution']);
+        unset($user['interest']);
+
+        $rules = User::updateRules();
+
+        $validator = Validator::make(
+            $user,
+            $rules['rules'],
+            $rules['messages']
+        );
+
+        if ($validator->fails()) {
+            return GeneralController::jsonReturn(
+                false,
+                401,
+                $user,
+                'Validation error.',
+                $validator->errors()
+            );
+        }
+
+        $rules = Institution::updateRules();
+
+        $validator = Validator::make(
+            $institution,
+            $rules['rules'],
+            $rules['messages']
+        );
+
+        if ($validator->fails()) {
+            return GeneralController::jsonReturn(
+                false,
+                401,
+                $institution,
+                'Validation error.',
+                $validator->errors()
+            );
+        }
+
+        try {
+            $userData = User::where('id_user', $user['id_user'])->first();
+
+            if (!$userData->update($user)) {
+                return GeneralController::jsonReturn(false, 400, $user, 'User not updated.');
+            }
+
+            $institution['id_user'] = $user['id_user'];
+
+            $institutionData = Institution::where('id_institution', $institution['id_institution']);
+
+            if (!$institutionData->update($institution)) {
+                return GeneralController::jsonReturn(false, 400, $institution, 'Institution not created.');
+            }
+
+            $user['institution'] = $institution;
+
+            return GeneralController::jsonReturn(true, 201, $user, 'Successfully updated user institution.');
+        } catch (Exception $exception) {
+            return GeneralController::jsonReturn(false, 400, $user, 'User not updated.', $exception);
+        }
     }
 
     public function create(Request $request)

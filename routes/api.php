@@ -32,7 +32,9 @@ Route::post("solicitation/status-solicitation", "SolicitationController@updateSt
 Route::post("institution/search-institutions", "InstitutionController@searchInstitutions");
 
 Route::post("user/register-volunteer", "UserController@registerVolunteer");
+Route::post("user/update-volunteer", "UserController@updateVolunteer");
 Route::post("user/register-institution", "UserController@registerInstitution");
+Route::post("user/update-institution", "UserController@updateInstitution");
 Route::post("interest/insert", "InterestController@insert");
 
 Route::post("user/create", "UserController@create");

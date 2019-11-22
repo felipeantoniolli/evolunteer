@@ -4,7 +4,6 @@ namespace App\Model;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Laravel\Passport\HasApiTokens;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -12,7 +11,6 @@ class User extends Authenticatable
 {
     use Notifiable;
     use SoftDeletes;
-    use HasApiTokens;
     protected $primaryKey = 'id_user';
 
     /**
@@ -50,7 +48,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token', 'updated_at', 'created_at', 'deleted_at'
+        'password', 'remember_token', 'updated_at', 'created_at', 'deleted_at', 'email_verified_at'
     ];
 
     /**
@@ -88,12 +86,11 @@ class User extends Authenticatable
             'rules' => [
                 'username' => 'required|min:3|max:25',
                 'email' => 'required|email',
-                'password' => 'required',
                 'telephone' => 'required|min:8|max:11',
                 'type' => 'required',
                 'cep' => 'required|min:8|max:8',
                 'street' => 'required|min:3|max:100',
-                'number' => 'required|min:3|max:10',
+                'number' => 'required|min:1|max:10',
                 'city' => 'required|min:3|max:50',
                 'state' => 'required|min:2|max:2',
                 'secondary_email' => 'nullable|email'
