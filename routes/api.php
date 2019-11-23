@@ -35,6 +35,7 @@ Route::post("user/register-volunteer", "UserController@registerVolunteer");
 Route::post("user/update-volunteer", "UserController@updateVolunteer");
 Route::post("user/register-institution", "UserController@registerInstitution");
 Route::post("user/update-institution", "UserController@updateInstitution");
+Route::post("user/update-password", "UserController@updatePassword");
 Route::post("interest/insert", "InterestController@insert");
 
 Route::post("user/create", "UserController@create");
