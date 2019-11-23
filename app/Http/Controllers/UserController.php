@@ -102,19 +102,23 @@ class UserController extends Controller
 
         $user['password'] = GeneralController::parseToSha256($user['password']);
 
-        if (!$user = User::create($user)) {
-            return GeneralController::jsonReturn(true, 400, $user, 'User not created.');
+        try {
+            if (!$user = User::create($user)) {
+                return GeneralController::jsonReturn(true, 400, $user, 'User not created.');
+            }
+
+            $institution['id_user'] = $user['id_user'];
+
+            if (!Institution::create($institution)) {
+                return GeneralController::jsonReturn(true, 400, $institution, 'Institution not created.');
+            }
+
+            $user['institution'] = $institution;
+
+            return GeneralController::jsonReturn(true, 201, $user, 'Successfully created user institution.');
+        } catch (Exception $exception)  {
+            return GeneralController::jsonReturn(false, 400, null, 'Unexpected error.', $exception);
         }
-
-        $institution['id_user'] = $user['id_user'];
-
-        if (!Institution::create($institution)) {
-            return GeneralController::jsonReturn(true, 400, $institution, 'Institution not created.');
-        }
-
-        $user['institution'] = $institution;
-
-        return GeneralController::jsonReturn(true, 201, $user, 'Successfully created user institution.');
     }
 
     public function registerVolunteer(Request $request)
@@ -168,19 +172,75 @@ class UserController extends Controller
 
         $user['password'] = GeneralController::parseToSha256($user['password']);
 
-        if (!$user = User::create($user)) {
-            return GeneralController::jsonReturn(true, 400, $user, 'User not created.');
+        try {
+            if (!$user = User::create($user)) {
+                return GeneralController::jsonReturn(true, 400, $user, 'User not created.');
+            }
+
+            $volunteer['id_user'] = $user['id_user'];
+
+            if (!Volunteer::create($volunteer)) {
+                return GeneralController::jsonReturn(true, 400, $volunteer, 'Volunteer not created.');
+            }
+
+            $user['volunteer'] = $volunteer;
+
+            return GeneralController::jsonReturn(true, 201, $user, 'Successfully created user volunteer.');
+        } catch (Exception $exception)  {
+            return GeneralController::jsonReturn(false, 400, null, 'Unexpected error.', $exception);
+        }
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $req = $request->all();
+
+        if ($req['new_password'] != $req['repeat_password']) {
+            return GeneralController::jsonReturn(
+                false,
+                400,
+                null,
+                'Passwords do not match.',
+                $errors['errors'] = [
+                    'last_password' => "Password not match",
+                    'repeat_password' => "Password not match",
+                ]
+            );
         }
 
-        $volunteer['id_user'] = $user['id_user'];
+        try {
+            $user = User::where('id_user', $req['id_user'])->first();
 
-        if (!Volunteer::create($volunteer)) {
-            return GeneralController::jsonReturn(true, 400, $volunteer, 'Volunteer not created.');
+            if (!$user) {
+                return GeneralController::jsonReturn(false, 400, null, 'User not found.');
+            }
+
+            $lastPassword = GeneralController::parseToSha256($req['last_password']);
+            $oldPassword = $user->password;
+
+            if ($lastPassword != $oldPassword) {
+                return GeneralController::jsonReturn(
+                    false,
+                    400,
+                    null,
+                    'Passwords do not match.',
+                    $errors['errors'] = [
+                        'last_password' => "Password not match",
+                        'new_password' => "Password not match"
+                    ]
+                );
+            }
+
+            $newPassword = GeneralController::parseToSha256($req['new_password']);
+
+            if (!$user->update(['password' => $newPassword])) {
+                return GeneralController::jsonReturn(false, 400, $user, 'User not updated.');
+            }
+
+            return GeneralController::jsonReturn(true, 200, $user, 'Successfully updated user password.');
+        } catch (Exception $exception)  {
+            return GeneralController::jsonReturn(false, 400, null, 'Unexpected error.', $exception);
         }
-
-        $user['volunteer'] = $volunteer;
-
-        return GeneralController::jsonReturn(true, 201, $user, 'Successfully created user volunteer.');
     }
 
     public function updateVolunteer(Request $request)
@@ -242,12 +302,12 @@ class UserController extends Controller
             $volunteerData = Volunteer::where('id_volunteer', $volunteer['id_volunteer']);
 
             if (!$volunteerData->update($volunteer)) {
-                return GeneralController::jsonReturn(false, 400, $volunteer, 'Volunteer not created.');
+                return GeneralController::jsonReturn(false, 400, $volunteer, 'Volunteer not updated.');
             }
 
             $user['volunteer'] = $volunteer;
 
-            return GeneralController::jsonReturn(true, 201, $user, 'Successfully updated user volunteer.');
+            return GeneralController::jsonReturn(true, 200, $user, 'Successfully updated user volunteer.');
         } catch (Exception $exception) {
             return GeneralController::jsonReturn(false, 400, $user, 'User not updated.', $exception);
         }
@@ -312,12 +372,12 @@ class UserController extends Controller
             $institutionData = Institution::where('id_institution', $institution['id_institution']);
 
             if (!$institutionData->update($institution)) {
-                return GeneralController::jsonReturn(false, 400, $institution, 'Institution not created.');
+                return GeneralController::jsonReturn(false, 400, $institution, 'Institution not updated.');
             }
 
             $user['institution'] = $institution;
 
-            return GeneralController::jsonReturn(true, 201, $user, 'Successfully updated user institution.');
+            return GeneralController::jsonReturn(true, 200, $user, 'Successfully updated user institution.');
         } catch (Exception $exception) {
             return GeneralController::jsonReturn(false, 400, $user, 'User not updated.', $exception);
         }

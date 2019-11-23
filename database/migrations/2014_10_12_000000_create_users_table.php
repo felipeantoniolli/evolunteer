@@ -19,6 +19,7 @@ class CreateUsersTable extends Migration
             $table->string('username', 25)->unique();
             $table->string('password');
             $table->string('telephone', 11);
+            $table->string('cellphone', 11);
             $table->boolean('type');
             $table->string('cep', 8);
             $table->string('street', 100);
@@ -28,6 +29,7 @@ class CreateUsersTable extends Migration
             $table->string('complement')->nullable();
             $table->string('reference')->nullable();
             $table->boolean('active');
+            $table->string("image")->nullable();
             $table->string('secondary_telephone', 11)->nullable();
             $table->string('token')->nullable();
             $table->string('secondary_email', 50)->unique()->nullable();
