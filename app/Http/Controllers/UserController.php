@@ -100,6 +100,18 @@ class UserController extends Controller
             );
         }
 
+        $documentInvalid = Institution::validDocuments($institution);
+
+        if ($documentInvalid) {
+            return GeneralController::jsonReturn(
+                false,
+                401,
+                $institution,
+                'Validation error.',
+                $documentInvalid
+            );
+        }
+
         $user['password'] = GeneralController::parseToSha256($user['password']);
 
         try {
@@ -167,6 +179,18 @@ class UserController extends Controller
                 $volunteer,
                 'Validation error.',
                 $validator->errors()
+            );
+        }
+
+        $documentInvalid = Volunteer::validDocuments($volunteer);
+
+        if ($documentInvalid) {
+            return GeneralController::jsonReturn(
+                false,
+                401,
+                $volunteer,
+                'Validation error.',
+                $documentInvalid
             );
         }
 

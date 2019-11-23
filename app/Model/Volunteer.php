@@ -2,6 +2,7 @@
 
 namespace App\Model;
 
+use App\Http\Controllers\GeneralController;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Model\Institution;
@@ -68,6 +69,20 @@ class Volunteer extends Model
         ];
     }
 
+    public static function validDocuments($req)
+    {
+        $cpfIsValid = true;
+        $cpfIsValid = GeneralController::validCpf($req['cpf']);
+
+        $errors = [];
+
+        if (!$cpfIsValid) {
+            $errors['cpf'] = ['CPF inválido'];
+        }
+
+        return $errors;
+    }
+
     public static function uniqueRules($req, $data)
     {
         $errors = [];
@@ -101,6 +116,10 @@ class Volunteer extends Model
 
         if ($rgNotUnique) {
             $errors['rg'] = ['RG em uso'];
+        }
+
+        if (!$errors) {
+            $errors = User::validDocuments($req);
         }
 
         return $errors;

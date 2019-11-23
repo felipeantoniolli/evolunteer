@@ -2,6 +2,7 @@
 
 namespace App\Model;
 
+use App\Http\Controllers\GeneralController;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -63,6 +64,29 @@ class Institution extends Model
         ];
     }
 
+    public static function validDocuments($req)
+    {
+        $cpfIsValid = true;
+
+        if (isset($req['cpf'])) {
+            $cpfIsValid = GeneralController::validCpf($req['cpf']);
+        }
+
+        $cnpjIsValid = GeneralController::validCnpj($req['cnpj']);
+
+        $errors = [];
+
+        if (!$cpfIsValid) {
+            $errors['cpf'] = ['CPF inválido'];
+        }
+
+        if (!$cnpjIsValid) {
+            $errors['cnpj'] = ['CNPJ inválido'];
+        }
+
+        return $errors;
+    }
+
     public static function uniqueRules($req, $data)
     {
         $errors = [];
@@ -103,6 +127,10 @@ class Institution extends Model
 
         if ($cnpjNotUnique) {
             $errors['cnpj'] = ['CNPJ em uso'];
+        }
+
+        if (!$errors) {
+            $errors = User::validDocuments($req);
         }
 
         return $errors;
