@@ -128,7 +128,7 @@ class User extends Authenticatable
 
         $secondayEmailNotUnique = null;
 
-        if ($req['secondary_email']) {
+        if (isset($req['secondary_email'])) {
             $secondayEmailNotUnique = User::where('secondary_email', $req['secondary_email'])
             ->where('email', $req['secondary_email'])
             ->where('id_user', '<>', $data->id_user)->fisrt();
@@ -147,5 +147,19 @@ class User extends Authenticatable
         }
 
         return $errors;
+    }
+
+    public static function imageRules()
+    {
+        return [
+            'rules' => [
+                'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            ],
+            'messages' => [
+                'required' => 'Campo obrigatório',
+                'max' => 'O arquivo é muito grande',
+                'mimes' => "Formato inválido, envie arquivos no formato jpeg, png ou jpg"
+            ]
+        ];
     }
 }

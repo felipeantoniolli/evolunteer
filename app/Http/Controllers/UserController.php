@@ -293,11 +293,37 @@ class UserController extends Controller
         try {
             $userData = User::where('id_user', $user['id_user'])->first();
 
+            $uniqueRules = User::uniqueRules($user, $userData);
+
+            if ($uniqueRules) {
+                return GeneralController::jsonReturn(
+                    false,
+                    401,
+                    $user,
+                    'Validation error.',
+                    $uniqueRules
+                );
+            }
+
+
+            $volunteerData = Volunteer::where('id_user', $user['id_user'])->first();
+
+            $volunteer['id_user'] = $user['id_user'];
+            $uniqueRules = Volunteer::uniqueRules($volunteer, $volunteerData);
+
+            if ($uniqueRules) {
+                return GeneralController::jsonReturn(
+                    false,
+                    401,
+                    $volunteer,
+                    'Validation error.',
+                    $uniqueRules
+                );
+            }
+
             if (!$userData->update($user)) {
                 return GeneralController::jsonReturn(false, 400, $user, 'User not updated.');
             }
-
-            $volunteer['id_user'] = $user['id_user'];
 
             $volunteerData = Volunteer::where('id_volunteer', $volunteer['id_volunteer']);
 
@@ -309,7 +335,7 @@ class UserController extends Controller
 
             return GeneralController::jsonReturn(true, 200, $user, 'Successfully updated user volunteer.');
         } catch (Exception $exception) {
-            return GeneralController::jsonReturn(false, 400, $user, 'User not updated.', $exception);
+            return GeneralController::jsonReturn(false, 400, $user, 'Unexpected Error.', $exception);
         }
     }
 
@@ -363,11 +389,36 @@ class UserController extends Controller
         try {
             $userData = User::where('id_user', $user['id_user'])->first();
 
+            $uniqueRules = User::uniqueRules($user, $userData);
+
+            if ($uniqueRules) {
+                return GeneralController::jsonReturn(
+                    false,
+                    401,
+                    $user,
+                    'Validation error.',
+                    $uniqueRules
+                );
+            }
+
+            $institutionData = Institution::where('id_user', $user['id_user'])->first();
+
+            $institution['id_user'] = $user['id_user'];
+            $uniqueRules = Institution::uniqueRules($user, $institutionData);
+
+            if ($uniqueRules) {
+                return GeneralController::jsonReturn(
+                    false,
+                    401,
+                    $institution,
+                    'Validation error.',
+                    $uniqueRules
+                );
+            }
+
             if (!$userData->update($user)) {
                 return GeneralController::jsonReturn(false, 400, $user, 'User not updated.');
             }
-
-            $institution['id_user'] = $user['id_user'];
 
             $institutionData = Institution::where('id_institution', $institution['id_institution']);
 
@@ -383,56 +434,6 @@ class UserController extends Controller
         }
     }
 
-    public function create(Request $request)
-    {
-        $user = $request->all();
-        $rules = User::insertRules();
-
-        $validator = Validator::make(
-            $user,
-            $rules['rules'],
-            $rules['messages']
-        );
-
-        if ($validator->fails()) {
-            return GeneralController::jsonReturn(
-                false,
-                401,
-                $user,
-                'Validation error.',
-                $validator->errors()
-            );
-        }
-
-        $user['password'] = GeneralController::parseToSha256($user['password']);
-
-        if (!$user = User::create($user)) {
-            return GeneralController::jsonReturn(true, 400, $user, 'User not created.');
-        }
-
-        return GeneralController::jsonReturn(true, 201, $user, 'Successfully created user.');
-    }
-
-    public function findAll()
-    {
-        $users = User::all();
-
-        if (!$users) {
-            return GeneralController::jsonReturn(false, 400, [], 'Users not found.');
-        }
-
-        return GeneralController::jsonReturn(true, 200, $users, 'Users successfully found.');
-    }
-
-    public function findById(User $user)
-    {
-        if (!$user) {
-            return GeneralController::jsonReturn(false, 400, [],  'User not found.');
-        }
-
-        return GeneralController::jsonReturn(true, 200, $user, 'User successfully found.');
-    }
-
     public function findByToken(Request $request)
     {
         $req = $request->all();
@@ -445,10 +446,18 @@ class UserController extends Controller
         return $this->getDataByUserId($user);
     }
 
-    public function update(Request $request, User $user)
+    public function uploadImage(Request $request)
     {
+        if (!$request->hasFile('image') && !$request->file('image')->isValid()) {
+            $errors['errors'] = [
+                'image' => 'Not found'
+            ];
+
+            return GeneralController::jsonReturn(false, 401, null, 'Image not found.', $errors);
+        }
+
+        $rules = User::imageRules();
         $req = $request->all();
-        $rules = User::updateRules();
 
         $validator = Validator::make(
             $req,
@@ -460,45 +469,50 @@ class UserController extends Controller
             return GeneralController::jsonReturn(
                 false,
                 401,
-                $req,
+                null,
                 'Validation error.',
                 $validator->errors()
             );
         }
 
-        $uniqueRules = User::uniqueRules($req, $user);
+        try {
+            $user = User::where('id_user', $req['id_user'])->first();
 
-        if ($uniqueRules) {
-            return GeneralController::jsonReturn(
-                false,
-                401,
-                $req,
-                'Validation error.',
-                $uniqueRules
-            );
-        }
+            if (!$user) {
+                $errors['errors'] = [
+                    'user' => 'not found'
+                ];
 
-        $req['password'] = GeneralController::parseToSha256($req['password']);
-
-        foreach ($req as $index => $value) {
-            if ($value != $user[$index]) {
-                $user->$index = $value;
+                return GeneralController::jsonReturn(false, 400, null, 'User not found.', $errors);
             }
+
+            $name = uniqid(date('HisYmd') . $user->id_user);
+
+            $extension = $request->image->extension();
+
+            $nameFile = "{$name}.{$extension}";
+
+            $upload = $request->image->storeAs('user', $nameFile);
+
+            if (!$upload) {
+                $errors['errors'] = [
+                    'upload' => 'Upload image error'
+                ];
+
+                return GeneralController::jsonReturn(false, 400, null, 'Upload image error.', $errors);
+            }
+
+            if (!$user = $user->update(['image' => $nameFile])) {
+                $errors['errors'] = [
+                    'upload' => 'Insert image error'
+                ];
+
+                return GeneralController::jsonReturn(false, 400, null, 'Insert image error.', $errors);
+            }
+
+            return GeneralController::jsonReturn(true, 200, $user, 'Successfully updated user image.');
+        } catch (Exception $exception) {
+            return GeneralController::jsonReturn(false, 400, $user, 'User not updated.', $exception);
         }
-
-        if (!$user = $user->save()) {
-            return GeneralController::jsonReturn(false, 400, $user, 'User not updated.');
-        }
-
-        return GeneralController::jsonReturn(true, 200, $req, 'User updated successfully.');
-    }
-
-    public function destroy(User $user)
-    {
-        if (!$user->delete()) {
-            return GeneralController::jsonReturn(false, 400, $user, 'User not deleted');
-        }
-
-        return GeneralController::jsonReturn(true, 200, $user, 'User successfully deleted');
     }
 }

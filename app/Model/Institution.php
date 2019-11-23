@@ -76,7 +76,8 @@ class Institution extends Model
         }
 
         $cpfNotUnique = null;
-        if ($req['cpf']) {
+
+        if (isset($req['cpf'])) {
             $cpfNotUnique = Institution::where('cpf', $req['cpf'])
             ->where('id_user', '<>', $data->id_user)->first();
 
@@ -86,9 +87,11 @@ class Institution extends Model
         }
 
         $cnpjNotUnique = null;
-        if ($req['cnpj']) {
+
+        if (isset($req['cnpj'])) {
             $cnpjNotUnique = Institution::where('cnpj', $req['cnpj'])
-            ->where('id_user', '<>', $data->id_user)->first();        }
+            ->where('id_user', '<>', $data->id_user)->first();
+        }
 
         if ($idUserNotUnique) {
             $errors['id_user'] = ['ID em uso.'];

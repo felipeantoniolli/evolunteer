@@ -71,9 +71,8 @@ class Volunteer extends Model
     public static function uniqueRules($req, $data)
     {
         $errors = [];
-
         $idUserNotUnique = Volunteer::where('id_user', $req['id_user'])
-        ->where('id_user', '<>', $data->id_user)->first();
+            ->where('id_user', '<>', $data->id_user)->first();
 
         if (!$idUserNotUnique) {
              $idUserNotUnique = Institution::where('id_user', $req['id_user'])
@@ -88,7 +87,7 @@ class Volunteer extends Model
         }
 
         $rgNotUnique = null;
-        if ($req['rg']) {
+        if (isset($req['rg'])) {
             $rgNotUnique = Volunteer::where('rg', $req['rg'])
             ->where('id_user', '<>', $data->id_user)->first();        }
 
