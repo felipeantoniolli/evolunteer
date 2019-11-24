@@ -37,7 +37,7 @@ class GeneralController extends Controller
         ], $response);
     }
 
-    public function validCpf($cpf = null)
+    public static function validCpf($cpf = null)
     {
         if(!$cpf) {
             return false;
@@ -77,7 +77,6 @@ class GeneralController extends Controller
             return true;
         }
     }
-
 
     public static function validCnpj($cnpj)
     {

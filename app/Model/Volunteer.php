@@ -119,7 +119,7 @@ class Volunteer extends Model
         }
 
         if (!$errors) {
-            $errors = User::validDocuments($req);
+            $errors = Volunteer::validDocuments($req);
         }
 
         return $errors;

@@ -75,7 +75,7 @@ class UserController extends Controller
         if ($validator->fails()) {
             return GeneralController::jsonReturn(
                 false,
-                401,
+                400,
                 $user,
                 'Validation error.',
                 $validator->errors()
@@ -93,7 +93,7 @@ class UserController extends Controller
         if ($validator->fails()) {
             return GeneralController::jsonReturn(
                 false,
-                401,
+                400,
                 $institution,
                 'Validation error.',
                 $validator->errors()
@@ -105,7 +105,7 @@ class UserController extends Controller
         if ($documentInvalid) {
             return GeneralController::jsonReturn(
                 false,
-                401,
+                400,
                 $institution,
                 'Validation error.',
                 $documentInvalid
@@ -157,7 +157,7 @@ class UserController extends Controller
         if ($validator->fails()) {
             return GeneralController::jsonReturn(
                 false,
-                401,
+                400,
                 $user,
                 'Validation error.',
                 $validator->errors()
@@ -175,7 +175,7 @@ class UserController extends Controller
         if ($validator->fails()) {
             return GeneralController::jsonReturn(
                 false,
-                401,
+                400,
                 $volunteer,
                 'Validation error.',
                 $validator->errors()
@@ -187,7 +187,7 @@ class UserController extends Controller
         if ($documentInvalid) {
             return GeneralController::jsonReturn(
                 false,
-                401,
+                400,
                 $volunteer,
                 'Validation error.',
                 $documentInvalid
@@ -289,7 +289,7 @@ class UserController extends Controller
         if ($validator->fails()) {
             return GeneralController::jsonReturn(
                 false,
-                401,
+                400,
                 $user,
                 'Validation error.',
                 $validator->errors()
@@ -307,7 +307,7 @@ class UserController extends Controller
         if ($validator->fails()) {
             return GeneralController::jsonReturn(
                 false,
-                401,
+                400,
                 $volunteer,
                 'Validation error.',
                 $validator->errors()
@@ -322,13 +322,12 @@ class UserController extends Controller
             if ($uniqueRules) {
                 return GeneralController::jsonReturn(
                     false,
-                    401,
+                    400,
                     $user,
                     'Validation error.',
                     $uniqueRules
                 );
             }
-
 
             $volunteerData = Volunteer::where('id_user', $user['id_user'])->first();
 
@@ -338,7 +337,7 @@ class UserController extends Controller
             if ($uniqueRules) {
                 return GeneralController::jsonReturn(
                     false,
-                    401,
+                    400,
                     $volunteer,
                     'Validation error.',
                     $uniqueRules
@@ -385,7 +384,7 @@ class UserController extends Controller
         if ($validator->fails()) {
             return GeneralController::jsonReturn(
                 false,
-                401,
+                400,
                 $user,
                 'Validation error.',
                 $validator->errors()
@@ -403,7 +402,7 @@ class UserController extends Controller
         if ($validator->fails()) {
             return GeneralController::jsonReturn(
                 false,
-                401,
+                400,
                 $institution,
                 'Validation error.',
                 $validator->errors()
@@ -418,7 +417,7 @@ class UserController extends Controller
             if ($uniqueRules) {
                 return GeneralController::jsonReturn(
                     false,
-                    401,
+                    400,
                     $user,
                     'Validation error.',
                     $uniqueRules
@@ -433,7 +432,7 @@ class UserController extends Controller
             if ($uniqueRules) {
                 return GeneralController::jsonReturn(
                     false,
-                    401,
+                    400,
                     $institution,
                     'Validation error.',
                     $uniqueRules
@@ -464,7 +463,7 @@ class UserController extends Controller
         $token = $req['token'];
 
         if (!$user = User::where('token', $token)->first()) {
-            return GeneralController::jsonReturn(false, 400, [],  'Token not found.');
+            return GeneralController::jsonReturn(false, 401, [],  'Token not found.');
         }
 
         return $this->getDataByUserId($user);
@@ -477,7 +476,7 @@ class UserController extends Controller
                 'image' => 'Not found'
             ];
 
-            return GeneralController::jsonReturn(false, 401, null, 'Image not found.', $errors);
+            return GeneralController::jsonReturn(false, 400, null, 'Image not found.', $errors);
         }
 
         $rules = User::imageRules();
@@ -492,7 +491,7 @@ class UserController extends Controller
         if ($validator->fails()) {
             return GeneralController::jsonReturn(
                 false,
-                401,
+                400,
                 null,
                 'Validation error.',
                 $validator->errors()
