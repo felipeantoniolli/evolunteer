@@ -8,6 +8,7 @@ use App\Model\User;
 use App\Model\Volunteer;
 use App\Model\Institution;
 use App\Model\Interest;
+use Illuminate\Support\Facades\Storage;
 use Exception;
 use Validator;
 
@@ -471,31 +472,16 @@ class UserController extends Controller
 
     public function uploadImage(Request $request)
     {
-        if (!$request->hasFile('image') && !$request->file('image')->isValid()) {
+        $req = $request->all();
+
+        if (!$req['image']) {
+            $req = $request->all();
+
             $errors['errors'] = [
                 'image' => 'Not found'
             ];
 
             return GeneralController::jsonReturn(false, 400, null, 'Image not found.', $errors);
-        }
-
-        $rules = User::imageRules();
-        $req = $request->all();
-
-        $validator = Validator::make(
-            $req,
-            $rules['rules'],
-            $rules['messages']
-        );
-
-        if ($validator->fails()) {
-            return GeneralController::jsonReturn(
-                false,
-                400,
-                null,
-                'Validation error.',
-                $validator->errors()
-            );
         }
 
         try {
@@ -509,15 +495,15 @@ class UserController extends Controller
                 return GeneralController::jsonReturn(false, 400, null, 'User not found.', $errors);
             }
 
-            $name = uniqid(date('HisYmd') . $user->id_user);
+            $filename = uniqid(date('HisYmd') . $user->id_user);
 
-            $extension = $request->image->extension();
+            $image = base64_decode($request['image']);
 
-            $nameFile = "{$name}.{$extension}";
+            $filename .= '.jpeg';
 
-            $upload = $request->image->storeAs('user', $nameFile);
+            $success = Storage::disk('public')->put($filename, $image);
 
-            if (!$upload) {
+            if (!$success) {
                 $errors['errors'] = [
                     'upload' => 'Upload image error'
                 ];
@@ -525,7 +511,7 @@ class UserController extends Controller
                 return GeneralController::jsonReturn(false, 400, null, 'Upload image error.', $errors);
             }
 
-            if (!$user = $user->update(['image' => $nameFile])) {
+            if (!$user->update(['image' => $filename])) {
                 $errors['errors'] = [
                     'upload' => 'Insert image error'
                 ];

@@ -40,6 +40,7 @@ Route::get("work/find/{work}", "WorkController@findById");
 Route::delete("work/delete/{work}", "WorkController@destroy");
 Route::post("work/find-by-institution", "WorkController@findByInstitutionId");
 
+Route::post("solicitation/create", "SolicitationController@create");
 Route::post("solicitation/find-by-user-and-institutuon", "SolicitationController@findSolicitationPendingByUserAndInstitution");
 Route::post("solicitation/find-by-volunteer", "SolicitationController@findByVolunteer");
 
