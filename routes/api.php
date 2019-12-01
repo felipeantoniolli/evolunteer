@@ -34,7 +34,7 @@ Route::post("solicitation/status-solicitation", "SolicitationController@updateSt
 Route::post("institution/search-institutions", "InstitutionController@searchInstitutions");
 
 Route::post("work/create", "WorkController@create");
-Route::patch("work/update/{work}", "WorkController@update");
+Route::post("work/update/{work}", "WorkController@update");
 Route::get("work/find-all", "WorkController@findAll");
 Route::get("work/find/{work}", "WorkController@findById");
 Route::delete("work/delete/{work}", "WorkController@destroy");
