@@ -428,7 +428,7 @@ class UserController extends Controller
             $institutionData = Institution::where('id_user', $user['id_user'])->first();
 
             $institution['id_user'] = $user['id_user'];
-            $uniqueRules = Institution::uniqueRules($user, $institutionData);
+            $uniqueRules = Institution::uniqueRules($institution, $institutionData);
 
             if ($uniqueRules) {
                 return GeneralController::jsonReturn(
@@ -454,7 +454,7 @@ class UserController extends Controller
 
             return GeneralController::jsonReturn(true, 200, $user, 'Successfully updated user institution.');
         } catch (Exception $exception) {
-            return GeneralController::jsonReturn(false, 400, $user, 'User not updated.', $exception);
+            return GeneralController::jsonReturn(false, 400, $user, 'Error not found.', $exception);
         }
     }
 

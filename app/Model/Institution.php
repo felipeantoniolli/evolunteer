@@ -117,6 +117,10 @@ class Institution extends Model
             ->where('id_user', '<>', $data->id_user)->first();
         }
 
+        if (isset($req['cnpj']) && isset($req['cpf'])) {
+            $errors['cnpj'] = ['Campo obrigatório'];
+        }
+
         if ($idUserNotUnique) {
             $errors['id_user'] = ['ID em uso.'];
         }
@@ -130,7 +134,7 @@ class Institution extends Model
         }
 
         if (!$errors) {
-            $errors = Volunteer::validDocuments($req);
+            $errors = Institution::validDocuments($req);
         }
 
         return $errors;
